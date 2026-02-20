@@ -1,0 +1,52 @@
+# Solo laboratorios - para ejecutar sin la plataforma
+version: '3.8'
+
+services:
+  dvwa:
+    image: vulnerables/web-dvwa:latest
+    ports:
+      - "4280:80"
+    environment:
+      - MYSQL_HOST=dvwa-db
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+    depends_on:
+      - dvwa-db
+
+  dvwa-db:
+    image: mariadb:10.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+    volumes:
+      - dvwa_data:/var/lib/mysql
+
+  lab-sqli:
+    build:
+      context: ./labs/sqli
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    environment:
+      - MYSQL_HOST=lab-sqli-db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=seguridad_db
+    depends_on:
+      - lab-sqli-db
+
+  lab-sqli-db:
+    image: mariadb:10.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=seguridad_db
+    volumes:
+      - lab_sqli_data:/var/lib/mysql
+      - ./labs/sqli/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+volumes:
+  dvwa_data:
+  lab_sqli_data:

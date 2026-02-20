@@ -1,0 +1,38 @@
+{
+  "appId": "com.pps.plataforma",
+  "productName": "PPS Plataforma de Estudio",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "out/**/*",
+    "electron/main.js"
+  ],
+  "extraResources": [
+    {
+      "from": "out",
+      "to": "app/out",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "target": "nsis",
+    "icon": "electron/icon.ico"
+  },
+  "linux": {
+    "target": "AppImage",
+    "icon": "electron/icon.png",
+    "category": "Education"
+  },
+  "mac": {
+    "target": "dmg",
+    "icon": "electron/icon.icns",
+    "category": "public.app-category.education"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "electron/icon.ico",
+    "uninstallerIcon": "electron/icon.ico"
+  }
+}

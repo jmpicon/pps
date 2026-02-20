@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Plataforma web principal
+  pps-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  # DVWA - Entorno de prácticas vulnerable
+  dvwa:
+    image: vulnerables/web-dvwa:latest
+    ports:
+      - "4280:80"
+    environment:
+      - MYSQL_HOST=dvwa-db
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+    depends_on:
+      - dvwa-db
+    restart: unless-stopped
+
+  dvwa-db:
+    image: mariadb:10.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+    volumes:
+      - dvwa_data:/var/lib/mysql
+    restart: unless-stopped
+
+  # Laboratorio SQL Injection - Apache + PHP + MySQL
+  lab-sqli:
+    build:
+      context: ./labs/sqli
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    environment:
+      - MYSQL_HOST=lab-sqli-db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=seguridad_db
+    depends_on:
+      - lab-sqli-db
+    restart: unless-stopped
+
+  lab-sqli-db:
+    image: mariadb:10.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=seguridad_db
+    volumes:
+      - lab_sqli_data:/var/lib/mysql
+      - ./labs/sqli/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
+volumes:
+  dvwa_data:
+  lab_sqli_data:
