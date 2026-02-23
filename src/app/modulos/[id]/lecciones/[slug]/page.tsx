@@ -1,9 +1,11 @@
 import Link from 'next/link'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { ArrowLeft, Shield, Target, KeyRound, FlaskConical } from 'lucide-react'
-import { getModule, getLesson } from '@/content/modules/registry'
-import { allModules } from '@/content/modules/registry'
+import { Target, KeyRound, FlaskConical } from 'lucide-react'
+import { getModule, getLesson, allModules } from '@/content/modules/registry'
+import { MarkdownContent } from '@/components/MarkdownContent'
+import { LessonVisitedTracker } from '@/components/LessonVisitedTracker'
+import { CopyableCode } from '@/components/CopyableCode'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
+import type { Metadata } from 'next'
 
 export async function generateStaticParams() {
   const params: { id: string; slug: string }[] = []
@@ -15,151 +17,170 @@ export async function generateStaticParams() {
   return params
 }
 
-export default async function LessonPage({ params }: { params: { id: string; slug: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string; slug: string }
+}): Promise<Metadata> {
+  const mod = getModule(params.id)
+  const lesson = mod ? getLesson(params.id, params.slug) : undefined
+  if (!mod || !lesson) return { title: 'Lección no encontrada' }
+  return {
+    title: `${lesson.title} | ${mod.title} | PPS Academy`,
+    description: lesson.objectives?.[0] ?? `Lección de ${mod.title}`,
+  }
+}
+
+export default async function LessonPage({
+  params,
+}: {
+  params: { id: string; slug: string }
+}) {
   const mod = getModule(params.id)
   const lesson = mod ? getLesson(params.id, params.slug) : undefined
 
   if (!mod || !lesson) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-slate-400">Lección no encontrada</p>
-        <Link href={`/modulos/${params.id}`} className="ml-4 text-cyan-400">Volver</Link>
+      <div className="p-10 text-center max-w-md mx-auto">
+        <p className="text-[var(--text-muted)]">Lección no encontrada</p>
+        <Link
+          href={`/modulos/${params.id}`}
+          className="mt-4 inline-block text-[var(--accent)] font-medium hover:text-[var(--accent-bright)]"
+        >
+          Volver al módulo
+        </Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e17] via-[#0f172a] to-[#0a0e17]">
-      <header className="border-b border-[#334155]/50 bg-[#0a0e17]/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href={`/modulos/${params.id}/`}
-            className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition"
+    <article className="max-w-4xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
+      <LessonVisitedTracker slug={params.slug} />
+      <Breadcrumbs
+        items={[
+          { label: 'Módulos', href: '/modulos' },
+          { label: mod.title, href: `/modulos/${mod.id}` },
+          { label: lesson.title },
+        ]}
+      />
+
+      <h1 className="text-2xl lg:text-3xl font-bold text-white mb-8 tracking-tight">
+        {lesson.title}
+      </h1>
+
+      {lesson.objectives.length > 0 && (
+        <section
+          className="mb-8 p-6 rounded-2xl bg-[var(--accent)]/10 border border-[var(--accent)]/20"
+          aria-labelledby="objetivos-heading"
+        >
+          <h2
+            id="objetivos-heading"
+            className="flex items-center gap-2 font-semibold text-[var(--accent)] mb-4"
           >
-            <ArrowLeft className="w-5 h-5" />
-            {mod.title}
-          </Link>
-          <Link href="/" className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-cyan-400" />
-          </Link>
+            <Target className="h-5 w-5 shrink-0" />
+            Objetivos de aprendizaje
+          </h2>
+          <ul className="space-y-2 text-[var(--text)] text-[15px]">
+            {lesson.objectives.map((obj, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-[var(--accent)] mt-0.5">•</span>
+                <span>{obj}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {lesson.keyPoints.length > 0 && (
+        <section
+          className="mb-8 p-6 rounded-2xl bg-[var(--warning)]/10 border border-[var(--warning)]/20"
+          aria-labelledby="puntos-heading"
+        >
+          <h2
+            id="puntos-heading"
+            className="flex items-center gap-2 font-semibold text-[var(--warning)] mb-4"
+          >
+            <KeyRound className="h-5 w-5 shrink-0" />
+            Puntos clave
+          </h2>
+          <ul className="space-y-2 text-[var(--text)] text-[15px]">
+            {lesson.keyPoints.map((point, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-[var(--warning)] mt-0.5">•</span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="mb-10" aria-labelledby="teoria-heading">
+        <h2 id="teoria-heading" className="text-base font-semibold text-white mb-4">
+          Contenido teórico
+        </h2>
+        <div className="rounded-2xl bg-[var(--bg-card)] p-6 lg:p-8 border border-[var(--border)]">
+          <MarkdownContent content={lesson.theory} />
         </div>
-      </header>
+      </section>
 
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold mb-6">{lesson.title}</h1>
-
-        {lesson.objectives.length > 0 && (
-          <div className="mb-8 p-5 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
-            <h3 className="flex items-center gap-2 font-semibold text-cyan-400 mb-3">
-              <Target className="w-5 h-5" />
-              Objetivos
-            </h3>
-            <ul className="list-disc list-inside space-y-1 text-slate-300">
-              {lesson.objectives.map((obj, i) => (
-                <li key={i}>{obj}</li>
-              ))}
-            </ul>
+      {lesson.practice && (
+        <section className="mb-10" aria-labelledby="practica-heading">
+          <h2 id="practica-heading" className="text-base font-semibold text-white mb-4">
+            Práctica
+          </h2>
+          <div className="rounded-2xl bg-[var(--bg-card)] p-6 border border-[var(--border)]">
+            <MarkdownContent content={lesson.practice} />
           </div>
-        )}
+        </section>
+      )}
 
-        {lesson.keyPoints.length > 0 && (
-          <div className="mb-8 p-5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <h3 className="flex items-center gap-2 font-semibold text-amber-400 mb-3">
-              <KeyRound className="w-5 h-5" />
-              Puntos clave
-            </h3>
-            <ul className="list-disc list-inside space-y-1 text-slate-300">
-              {lesson.keyPoints.map((point, i) => (
-                <li key={i}>{point}</li>
-              ))}
-            </ul>
+      {lesson.codeExamples && lesson.codeExamples.length > 0 && (
+        <section className="mb-10" aria-labelledby="codigo-heading">
+          <h2 id="codigo-heading" className="text-base font-semibold text-white mb-4">
+            Ejemplos de código
+          </h2>
+          <div className="space-y-4">
+            {lesson.codeExamples.map((ex, i) => (
+              <CopyableCode key={i} code={ex.code} title={ex.title} />
+            ))}
           </div>
-        )}
+        </section>
+      )}
 
-        <div className="prose prose-invert prose-cyan max-w-none mb-12">
-          <h2 className="text-xl font-semibold text-slate-300 mb-4">Teoría</h2>
-          <div className="rounded-xl bg-[#1a2234] p-6 border border-[#334155]/50">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                pre: ({ children }) => (
-                  <pre className="overflow-x-auto rounded-lg bg-[#0a0e17] p-4 my-4 border border-[#334155]/50">
-                    {children}
-                  </pre>
-                ),
-                code: ({ className, children }) => {
-                  const isBlock = className?.includes('language-')
-                  if (isBlock) {
-                    return (
-                      <code className={className}>
-                        {children}
-                      </code>
-                    )
-                  }
-                  return (
-                    <code className="px-1.5 py-0.5 rounded bg-[#0a0e17] text-cyan-400 text-sm">
-                      {children}
-                    </code>
-                  )
-                }
-              }}
+      {lesson.activity && (
+        <section
+          className="p-6 rounded-2xl bg-[var(--terminal)]/10 border border-[var(--terminal)]/20"
+          aria-labelledby="actividad-heading"
+        >
+          <h2
+            id="actividad-heading"
+            className="flex items-center gap-2 font-semibold text-[var(--terminal)] mb-4"
+          >
+            <FlaskConical className="h-5 w-5 shrink-0" />
+            Actividad: {lesson.activity.title}
+          </h2>
+          <p className="text-[var(--text)] mb-4 text-[15px]">{lesson.activity.objective}</p>
+          <ol className="space-y-2 mb-6">
+            {lesson.activity.steps.map((step, i) => (
+              <li key={i} className="flex gap-3 text-[var(--text)]">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--terminal)]/20 text-[var(--terminal)] text-xs font-mono">
+                  {i + 1}
+                </span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+          {lesson.activity.labId && (
+            <Link
+              href={`/laboratorio/#${lesson.activity.labId}`}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--terminal)]/20 text-[var(--terminal)] font-medium hover:bg-[var(--terminal)]/30 transition-colors"
             >
-              {lesson.theory}
-            </ReactMarkdown>
-          </div>
-        </div>
-
-        {lesson.practice && (
-          <div className="prose prose-invert prose-emerald max-w-none mb-12">
-            <h2 className="text-xl font-semibold text-slate-300 mb-4">Práctica</h2>
-            <div className="rounded-xl bg-[#1a2234] p-6 border border-[#334155]/50">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{lesson.practice}</ReactMarkdown>
-            </div>
-          </div>
-        )}
-
-        {lesson.codeExamples && lesson.codeExamples.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-xl font-semibold text-slate-300 mb-4">Ejemplos de código</h2>
-            <div className="space-y-6">
-              {lesson.codeExamples.map((ex, i) => (
-                <div key={i} className="rounded-xl bg-[#1a2234] border border-[#334155]/50 overflow-hidden">
-                  <div className="px-4 py-2 bg-[#0a0e17] text-sm text-slate-400 border-b border-[#334155]/50">
-                    {ex.title}
-                  </div>
-                  <pre className="p-4 overflow-x-auto text-sm">
-                    <code className="text-cyan-400/90">{ex.code}</code>
-                  </pre>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {lesson.activity && (
-          <div className="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-            <h3 className="flex items-center gap-2 font-semibold text-emerald-400 mb-3">
-              <FlaskConical className="w-5 h-5" />
-              Actividad: {lesson.activity.title}
-            </h3>
-            <p className="text-slate-300 mb-4">{lesson.activity.objective}</p>
-            <ol className="list-decimal list-inside space-y-2 text-slate-300">
-              {lesson.activity.steps.map((step, i) => (
-                <li key={i}>{step}</li>
-              ))}
-            </ol>
-            {lesson.activity.labId && (
-              <Link
-                href={`/laboratorio/#${lesson.activity.labId}`}
-                className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition"
-              >
-                <FlaskConical className="w-4 h-4" />
-                Ir al laboratorio
-              </Link>
-            )}
-          </div>
-        )}
-      </main>
-    </div>
+              <FlaskConical className="h-4 w-4" />
+              Ir al laboratorio
+            </Link>
+          )}
+        </section>
+      )}
+    </article>
   )
 }

@@ -1,93 +1,127 @@
-# PPS - Plataforma de Estudio
+# PPS Academy - Puesta y Producción Segura
 
-Plataforma interactiva de estudio para el curso **Puesta y Producción Segura**. Incluye todo el temario teórico y práctico de los 6 módulos, con laboratorios Docker para practicar vulnerabilidades web.
+Plataforma educativa de referencia para la asignatura **Puesta y Producción Segura** (autor: José Picón). Curso completo con teoría, laboratorios guiados, retos y recursos para aprender ciberseguridad web desde cero hasta nivel profesional.
 
-## Contenido
+## Despliegue rápido (recomendado)
 
-- **Módulo 1**: Introducción a la Seguridad Web, OWASP Top Ten, Normativas
-- **Módulo 2**: SQLi, XSS, CSRF, RCE, SSRF, XXE, LFI, RFI, Unsafe Deserialization
-- **Módulo 3**: Broken Authentication, Gestión de Sesiones, JWT, OAuth
-- **Módulo 4**: TLS, AES, RBAC, ABAC
-- **Módulo 5**: CSP, HSTS, Security Misconfiguration, Logging & Monitoring
-- **Módulo 6**: SAST, DAST, Dependency-Check, OWASP ZAP
+```bash
+docker compose up -d
+```
 
-## Requisitos
+**Accesos:**
+- **Plataforma web**: http://localhost:3002
+- **Empieza aquí**: http://localhost:3002/start
+- **Mapa curricular**: http://localhost:3002/syllabus
+- **Laboratorios**: http://localhost:3002/laboratorio
+- **Lab SQL Injection** (modo guiado): http://localhost:3002/labs/lab-sqli
+- **DVWA** (modo guiado): http://localhost:3002/labs/dvwa
+- **Lab SQL Injection** (app vulnerable): http://localhost:8081
+- **DVWA** (app vulnerable): http://localhost:4280 (admin / password)
 
-- Node.js 18+
-- Docker y Docker Compose (para laboratorios)
+---
 
-## Instalación
+## Instalación y ejecución
+
+### Requisitos
+
+- **Docker** con Compose V2 (`docker compose`)
+- Node.js 18+ (recomendado 20; ver `.nvmrc`)
+
+### Desarrollo local
 
 ```bash
 npm install
-```
-
-## Uso
-
-### Desarrollo web
-
-```bash
 npm run dev
 ```
 
 Abre http://localhost:3000
 
-### Producción (Docker)
+### Build estático (SSG)
 
 ```bash
-docker-compose up -d
+npm run build
+npm run serve
 ```
 
-La plataforma estará en http://localhost:3000
+### Despliegue (Vercel recomendado)
 
-### Solo laboratorios
+1. Conecta el repositorio a Vercel
+2. Configura `NEXT_PUBLIC_BASE_URL` con la URL de producción
+3. Build: `npm run build` (Next.js detecta automáticamente)
+4. Los laboratorios Docker se ejecutan localmente; la web es estática
 
-```bash
-docker-compose -f docker-compose.labs.yml up -d
-```
+---
 
-- **DVWA**: http://localhost:4280 (admin / password)
-- **Lab SQL Injection**: http://localhost:8081
+## Cómo añadir contenido
 
-### App ejecutable (Electron)
+### Añadir una lección
 
-```bash
-# Build estático
-npm run build:static
+1. Edita el módulo en `src/content/modules/moduloN.ts`
+2. Añade un objeto en `lessons` con: `id`, `title`, `slug`, `objectives`, `keyPoints`, `theory`, `practice` (opcional), `codeExamples` (opcional), `activity` (opcional)
+3. Si hay lab asociado: `activity: { labId: 'lab-sqli' | 'dvwa', ... }`
 
-# Linux
-npm run electron:build:linux
+### Añadir un laboratorio
 
-# Windows
-npm run electron:build:win
+1. Crea el entorno en `labs/nombre-lab/` (Dockerfile, etc.)
+2. Añade el servicio en `docker-compose.yml` o `docker-compose.labs.yml`
+3. Registra el lab en `src/app/labs/[slug]/page.tsx` (objeto `labs`)
+4. Añade entrada en el sidebar en `src/components/Layout.tsx` (submenú Laboratorios)
 
-# macOS
-npm run electron:build:mac
-```
+### Estructura de contenido
 
-Los ejecutables se generan en `dist/`.
+- **Módulos**: `src/content/modules/modulo1.ts` … `modulo6.ts`
+- **Glosario**: `src/content/glossary.ts`
+- **Frontmatter** (en lecciones): `title`, `description`, `objectives`, `keyPoints`, `theory`, `practice`, `codeExamples`, `activity`
+
+---
 
 ## Estructura del proyecto
 
 ```
 pps/
 ├── src/
-│   ├── app/              # Páginas Next.js
-│   └── content/          # Contenido de los módulos
-├── labs/                 # Laboratorios Docker
-│   └── sqli/             # Lab SQL Injection
-├── electron/             # Configuración Electron
-├── docker-compose.yml    # Plataforma + laboratorios
+│   ├── app/                 # Next.js App Router
+│   │   ├── start/           # Empieza aquí
+│   │   ├── syllabus/        # Mapa curricular
+│   │   ├── modulos/         # Módulos y lecciones
+│   │   ├── lessons/         # Lecciones (ruta plana)
+│   │   ├── laboratorio/     # Listado labs
+│   │   ├── labs/            # Modo lab guiado (checklist, notas)
+│   │   ├── resources/       # Recursos externos
+│   │   ├── glossary/        # Glosario
+│   │   ├── search/          # Búsqueda
+│   │   └── ...
+│   ├── components/          # UI (Layout, LabView, Callout, CopyableCode, etc.)
+│   ├── content/             # Módulos, glosario, registry
+│   └── lib/                 # Navegación, helpers
+├── labs/                    # Laboratorios Docker
+│   └── sqli/                # Lab SQL Injection
+├── docs/                    # Inventario, plan, auditoría
+├── docker-compose.yml       # Todo en uno
 └── docker-compose.labs.yml  # Solo laboratorios
 ```
 
-## Laboratorios
+---
 
-Cada laboratorio incluye aplicaciones vulnerables intencionalmente para practicar explotación y mitigación:
+## Checklist de seguridad (despliegue)
 
-1. **Lab SQL Injection**: Apache + PHP + MySQL. Modo vulnerable y seguro con prepared statements.
-2. **DVWA**: Entorno completo con múltiples vulnerabilidades (SQLi, XSS, CSRF, LFI, RCE, etc.)
+- [ ] No hay credenciales hardcodeadas (usar variables de entorno)
+- [ ] Contenido MDX/Markdown sanitizado (react-markdown sin `dangerouslySetInnerHTML` directo)
+- [ ] CSP razonable (documentar en headers si Nginx/Vercel)
+- [ ] Dependencias actualizadas (`npm audit`)
+- [ ] `NEXT_PUBLIC_BASE_URL` configurado en producción para sitemap/robots
+
+---
+
+## Contenido del curso
+
+- **Módulo 1**: Introducción, OWASP Top Ten, Normativas
+- **Módulo 2**: SQLi, XSS, CSRF, RCE, SSRF, XXE, LFI, RFI, Deserialización
+- **Módulo 3**: Broken Auth, Sesiones, JWT, OAuth
+- **Módulo 4**: TLS, AES, RBAC, ABAC
+- **Módulo 5**: CSP, HSTS, Misconfiguration, Logging
+- **Módulo 6**: SAST, DAST, Dependency-Check, OWASP ZAP
 
 ## Licencia
 
-Uso educativo.
+Uso educativo. Autor: José Picón.

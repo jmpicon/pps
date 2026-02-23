@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.env*
+.DS_Store
+npm-debug.log*
+.npm
+.vscode
+.idea
+coverage
+*.log
+dist
+out

@@ -4,7 +4,7 @@ import { modulo3 } from './modulo3'
 import { modulo4 } from './modulo4'
 import { modulo5 } from './modulo5'
 import { modulo6 } from './modulo6'
-import type { Module } from './index'
+import type { Module, Lesson } from './index'
 
 export const allModules: Module[] = [
   modulo1,
@@ -22,4 +22,22 @@ export function getModule(id: string): Module | undefined {
 export function getLesson(moduleId: string, lessonSlug: string) {
   const mod = getModule(moduleId)
   return mod?.lessons.find(l => l.slug === lessonSlug)
+}
+
+export function getLessonBySlug(lessonSlug: string): { module: Module; lesson: Lesson } | undefined {
+  for (const mod of allModules) {
+    const lesson = mod.lessons.find(l => l.slug === lessonSlug)
+    if (lesson) return { module: mod, lesson }
+  }
+  return undefined
+}
+
+export function getAllLessonsFlat(): { module: Module; lesson: Lesson }[] {
+  const result: { module: Module; lesson: Lesson }[] = []
+  for (const mod of allModules) {
+    for (const lesson of mod.lessons) {
+      result.push({ module: mod, lesson })
+    }
+  }
+  return result
 }

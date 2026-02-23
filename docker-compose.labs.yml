@@ -1,6 +1,4 @@
 # Solo laboratorios - para ejecutar sin la plataforma
-version: '3.8'
-
 services:
   dvwa:
     image: vulnerables/web-dvwa:latest

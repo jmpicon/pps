@@ -1,110 +1,165 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Shield, Bug, Key, Lock, Settings, Search, BookOpen, FlaskConical } from 'lucide-react'
+import { Terminal, BookOpen, FlaskConical, ArrowRight, Sparkles, Copy, Check } from 'lucide-react'
 import { allModules } from '@/content/modules/registry'
+import { ModuleCard } from '@/components/ModuleCard'
+import { LabCard } from '@/components/LabCard'
+import { ScrollReveal } from '@/components/ScrollReveal'
 
-const icons: Record<string, React.ElementType> = {
-  shield: Shield,
-  bug: Bug,
-  key: Key,
-  lock: Lock,
-  settings: Settings,
-  search: Search
-}
+const labs = [
+  {
+    id: 'lab-sqli',
+    name: 'SQL Injection',
+    module: 'Módulo 2',
+    desc: 'Explotar y mitigar inyección SQL con Apache, PHP y MySQL',
+    port: 8081,
+    credentials: 'admin / admin123',
+    steps: [
+      'Iniciar contenedores: docker compose up -d',
+      'Abrir http://localhost:8081',
+      'Probar bypass: usuario \' OR \'1\'=\'1\' #',
+      'Cambiar a modo seguro con ?secure=1'
+    ],
+    vulns: ['Bypass autenticación', 'Extracción de credenciales']
+  },
+  {
+    id: 'dvwa',
+    name: 'DVWA',
+    module: 'General',
+    desc: 'Damn Vulnerable Web App - SQLi, XSS, CSRF, LFI, RCE',
+    port: 4280,
+    credentials: 'admin / password',
+    steps: [
+      'Abrir http://localhost:4280',
+      'Login con admin / password',
+      'Configurar seguridad en "DVWA Security"',
+      'Explorar cada vulnerabilidad por sección'
+    ],
+    vulns: ['SQL Injection', 'XSS', 'CSRF', 'LFI', 'RCE', 'File Upload']
+  }
+]
 
 export default function HomePage() {
+  const totalLessons = allModules.reduce((a, m) => a + m.lessons.length, 0)
+  const [copied, setCopied] = useState(false)
+
+  const copyCommand = () => {
+    navigator.clipboard.writeText('docker compose up -d')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e17] via-[#0f172a] to-[#0a0e17]">
-      {/* Header */}
-      <header className="border-b border-[#334155]/50 bg-[#0a0e17]/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-xl font-semibold">
-            <Shield className="w-7 h-7 text-cyan-400" />
-            <span>PPS Plataforma</span>
-          </Link>
-          <nav className="flex gap-6">
-            <Link href="/laboratorio" className="text-slate-400 hover:text-cyan-400 transition flex items-center gap-2">
-              <FlaskConical className="w-4 h-4" />
-              Laboratorio
-            </Link>
-          </nav>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <header className="relative overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/5 via-transparent to-[var(--terminal)]/5" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[var(--terminal)]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] text-sm font-medium mb-6">
+                <Sparkles className="h-4 w-4" />
+                Curso profesional · José Picón
+              </div>
+              <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white tracking-tight mb-4">
+                Puesta y Producción{' '}
+                <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--terminal)] bg-clip-text text-transparent">
+                  Segura
+                </span>
+              </h1>
+              <p className="text-lg text-[var(--text-muted)] max-w-xl mb-8 leading-relaxed">
+                Aprende ciberseguridad web desde cero: OWASP Top Ten, laboratorios prácticos y técnicas de hardening.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/start"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--bg-base)] font-bold text-sm hover:bg-[var(--accent-bright)] transition-all shadow-[0_0_30px_-8px_var(--accent)] hover:shadow-[0_0_40px_-8px_var(--accent)]"
+                >
+                  Empieza aquí
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={copyCommand}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 font-mono text-sm text-[var(--text-muted)] hover:bg-white/10 hover:border-[var(--accent)]/30 transition-all group"
+                  title="Copiar comando"
+                >
+                  <Terminal className="h-4 w-4 text-[var(--accent)] shrink-0" />
+                  <span>docker compose up -d</span>
+                  <span className="w-4 h-4 shrink-0 flex items-center justify-center">
+                    {copied ? <Check className="h-4 w-4 text-[var(--success)]" /> : <Copy className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 lg:gap-6">
+              {[
+                { value: allModules.length, label: 'Módulos', color: 'var(--accent)' },
+                { value: totalLessons, label: 'Lecciones', color: 'var(--terminal)' },
+                { value: 2, label: 'Labs', color: 'var(--success)' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  className="flex flex-col items-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 cursor-default transition-colors"
+                >
+                  <span className="text-3xl font-bold" style={{ color: stat.color }}>
+                    {stat.value}
+                  </span>
+                  <span className="text-sm text-[var(--text-muted)]">{stat.label}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">
-            Puesta y Producción Segura
-          </h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12">
-            Plataforma interactiva de estudio. Teoría, práctica y laboratorios para dominar la seguridad en aplicaciones web.
+      <main className="max-w-7xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <BookOpen className="h-6 w-6 text-[var(--accent)]" />
+            Módulos del curso
+          </h2>
+          <p className="text-[var(--text-muted)] mb-10">
+            Haz clic en cada módulo para expandir y ver las lecciones.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/modulos"
-              className="px-8 py-4 bg-cyan-500/20 text-cyan-400 rounded-xl font-medium hover:bg-cyan-500/30 transition border border-cyan-500/30 flex items-center gap-2"
-            >
-              <BookOpen className="w-5 h-5" />
-              Comenzar a estudiar
-            </Link>
-            <Link
-              href="/laboratorio"
-              className="px-8 py-4 bg-emerald-500/20 text-emerald-400 rounded-xl font-medium hover:bg-emerald-500/30 transition border border-emerald-500/30 flex items-center gap-2"
-            >
-              <FlaskConical className="w-5 h-5" />
-              Ir al Laboratorio
-            </Link>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allModules.map((mod, i) => (
+              <ScrollReveal key={mod.id} delay={i * 0.05}>
+                <ModuleCard module={mod} />
+              </ScrollReveal>
+            ))}
           </div>
-        </motion.div>
-      </section>
+        </section>
 
-      {/* Modules Grid */}
-      <section className="max-w-6xl mx-auto px-6 pb-24">
-        <h2 className="text-2xl font-semibold mb-8 text-slate-300">Módulos del curso</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {allModules.map((mod, i) => {
-            const Icon = icons[mod.icon] || Shield
-            return (
-              <motion.div
-                key={mod.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Link href={`/modulos/${mod.id}`}>
-                  <div className="group p-6 rounded-2xl bg-[#1a2234]/80 border border-[#334155]/50 hover:border-cyan-500/30 hover:bg-[#1a2234] transition-all duration-300">
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/20 transition">
-                        <Icon className="w-8 h-8" />
-                      </div>
-                      <div>
-                        <span className="text-sm text-cyan-400/80 font-mono">Módulo {mod.number}</span>
-                        <h3 className="text-lg font-semibold mt-1 group-hover:text-cyan-400 transition">{mod.title}</h3>
-                        <p className="text-sm text-slate-500 mt-2">{mod.description}</p>
-                        <span className="inline-block mt-3 text-sm text-cyan-400 opacity-0 group-hover:opacity-100 transition">
-                          Ver contenido →
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            )
-          })}
-        </div>
-      </section>
+        <section>
+          <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <FlaskConical className="h-6 w-6 text-[var(--terminal)]" />
+            Laboratorios prácticos
+          </h2>
+          <p className="text-[var(--text-muted)] mb-10">
+            Entornos vulnerables para practicar. Ejecuta{' '}
+            <code className="px-2 py-1 rounded-lg bg-white/5 text-[var(--accent)] font-mono text-sm border border-white/5">
+              docker compose up -d
+            </code>{' '}
+            para iniciar.
+          </p>
 
-      {/* Footer */}
-      <footer className="border-t border-[#334155]/50 py-8 text-center text-slate-500 text-sm">
-        <p>Plataforma de Estudio PPS · Curso de Puesta y Producción Segura</p>
-      </footer>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {labs.map((lab, i) => (
+              <ScrollReveal key={lab.id} delay={0.2 + i * 0.05}>
+                <LabCard lab={lab} />
+              </ScrollReveal>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
   )
 }

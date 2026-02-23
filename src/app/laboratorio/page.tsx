@@ -2,113 +2,181 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Shield, ArrowLeft, FlaskConical, Terminal, ExternalLink } from 'lucide-react'
-import { allModules } from '@/content/modules/registry'
+import { FlaskConical, Terminal, Play, CheckCircle2, AlertCircle, ListChecks } from 'lucide-react'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 const labs = [
-  { id: 'lab-sqli', name: 'SQL Injection', module: 'Módulo 2', desc: 'Explotar y mitigar SQLi con Apache+PHP+MySQL' },
-  { id: 'lab-xss', name: 'Cross-Site Scripting', module: 'Módulo 2', desc: 'XSS reflejado y almacenado' },
-  { id: 'lab-csrf', name: 'CSRF', module: 'Módulo 2', desc: 'Tokens CSRF y protección' },
-  { id: 'lab-rce', name: 'Remote Code Execution', module: 'Módulo 2', desc: 'Explotar y mitigar RCE' },
-  { id: 'lab-ssrf', name: 'SSRF', module: 'Módulo 2', desc: 'Acceso a recursos internos' },
-  { id: 'lab-xxe', name: 'XXE', module: 'Módulo 2', desc: 'XML External Entities' },
-  { id: 'lab-lfi', name: 'Local File Inclusion', module: 'Módulo 2', desc: 'Lectura de archivos del servidor' },
-  { id: 'lab-rfi', name: 'Remote File Inclusion', module: 'Módulo 2', desc: 'Ejecución de código remoto' },
-  { id: 'lab-deserialization', name: 'Unsafe Deserialization', module: 'Módulo 2', desc: 'Objetos serializados maliciosos' },
-  { id: 'lab-broken-auth', name: 'Broken Authentication', module: 'Módulo 3', desc: 'Fuerza bruta y MFA' },
-  { id: 'lab-sessions', name: 'Gestión de Sesiones', module: 'Módulo 3', desc: 'Cookies seguras y Session Hijacking' },
-  { id: 'lab-jwt', name: 'JWT', module: 'Módulo 3', desc: 'Manipulación y protección de JWT' },
-  { id: 'lab-oauth', name: 'OAuth', module: 'Módulo 3', desc: 'OAuth inseguro' },
-  { id: 'lab-tls', name: 'TLS', module: 'Módulo 4', desc: 'Configuración segura de TLS' },
-  { id: 'lab-aes', name: 'AES', module: 'Módulo 4', desc: 'Cifrado de datos sensibles' },
-  { id: 'lab-rbac', name: 'RBAC', module: 'Módulo 4', desc: 'Control de acceso por roles' },
-  { id: 'lab-abac', name: 'ABAC', module: 'Módulo 4', desc: 'Control por atributos' },
-  { id: 'lab-csp', name: 'Content Security Policy', module: 'Módulo 5', desc: 'Implementar CSP' },
-  { id: 'lab-hsts', name: 'HSTS', module: 'Módulo 5', desc: 'HTTP Strict Transport Security' },
-  { id: 'lab-misconfiguration', name: 'Security Misconfiguration', module: 'Módulo 5', desc: 'Auditoría y corrección' },
-  { id: 'lab-logging', name: 'Logging & Monitoring', module: 'Módulo 5', desc: 'Sistema de logging' },
-  { id: 'lab-sast', name: 'SAST', module: 'Módulo 6', desc: 'Análisis estático con SonarQube' },
-  { id: 'lab-dast', name: 'DAST', module: 'Módulo 6', desc: 'Análisis dinámico' },
-  { id: 'lab-dependency-check', name: 'Dependency-Check', module: 'Módulo 6', desc: 'Análisis de dependencias' },
-  { id: 'lab-zap', name: 'OWASP ZAP', module: 'Módulo 6', desc: 'Escaneo de seguridad' }
+  {
+    id: 'lab-sqli',
+    name: 'SQL Injection',
+    module: 'Módulo 2',
+    desc: 'Explotar y mitigar inyección SQL con Apache, PHP y MySQL',
+    port: 8081,
+    credentials: 'admin / admin123',
+    steps: [
+      'Iniciar contenedores: docker compose up -d',
+      'Abrir http://localhost:8081',
+      'Probar bypass: usuario \' OR \'1\'=\'1\' #',
+      'Cambiar a modo seguro con ?secure=1'
+    ],
+    vulns: ['Bypass autenticación', 'Extracción de credenciales']
+  },
+  {
+    id: 'dvwa',
+    name: 'DVWA',
+    module: 'General',
+    desc: 'Damn Vulnerable Web App - SQLi, XSS, CSRF, LFI, RCE',
+    port: 4280,
+    credentials: 'admin / password',
+    steps: [
+      'Abrir http://localhost:4280',
+      'Login con admin / password',
+      'Configurar seguridad en "DVWA Security"',
+      'Explorar cada vulnerabilidad por sección'
+    ],
+    vulns: ['SQL Injection', 'XSS', 'CSRF', 'LFI', 'RCE', 'File Upload']
+  }
 ]
 
 export default function LaboratorioPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e17] via-[#0f172a] to-[#0a0e17]">
-      <header className="border-b border-[#334155]/50 bg-[#0a0e17]/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition">
-            <ArrowLeft className="w-5 h-5" />
-            Volver
-          </Link>
-          <Link href="/" className="flex items-center gap-2 text-xl font-semibold">
-            <Shield className="w-7 h-7 text-cyan-400" />
-            PPS Plataforma
-          </Link>
+    <div className="max-w-4xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
+      <div className="mb-8">
+        <Breadcrumbs items={[{ label: 'Estudio', href: '/' }, { label: 'Laboratorio' }]} />
+      </div>
+      <div className="mb-12">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--terminal)]/15 border border-[var(--terminal)]/30 text-[var(--terminal)] text-sm font-semibold mb-6">
+          <FlaskConical className="h-4 w-4" />
+          Laboratorio de prácticas
         </div>
-      </header>
+        <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">Entornos de explotación</h1>
+        <p className="text-[var(--text-muted)] text-lg">
+          Aplicaciones vulnerables intencionalmente para practicar técnicas de seguridad
+        </p>
+      </div>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-400">
-            <FlaskConical className="w-12 h-12" />
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-12 rounded-2xl border-2 border-[var(--accent)]/30 bg-[var(--bg-card)]/80 backdrop-blur overflow-hidden"
+      >
+        <div className="flex items-center gap-2 px-5 py-4 bg-[var(--bg-elevated)] border-b border-white/5">
+          <Terminal className="h-5 w-5 text-[var(--accent)]" />
+          <span className="text-sm font-mono font-semibold text-[var(--text-muted)]">Iniciar todos los laboratorios</span>
+        </div>
+        <div className="p-6 font-mono text-sm">
+          <div className="text-[var(--text-dim)] mb-2"># Ejecutar en tu terminal:</div>
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--accent)]">$</span>
+            <code className="text-[var(--accent-bright)] font-semibold">docker compose up -d</code>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">Laboratorio de Prácticas</h1>
-            <p className="text-slate-400">{labs.length} ejercicios prácticos para aplicar lo aprendido</p>
+          <div className="text-[var(--text-dim)] mt-4 text-xs">
+            Levanta: Plataforma (3002), Lab SQLi (8081), DVWA (4280)
           </div>
         </div>
+      </motion.div>
 
-        <div className="mb-8 p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
-          <h3 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">
-            <Terminal className="w-5 h-5" />
-            Cómo usar el laboratorio
-          </h3>
-          <p className="text-slate-300 mb-4">
-            Los laboratorios se ejecutan en contenedores Docker. Inicia el entorno con:
-          </p>
-          <pre className="bg-[#0a0e17] p-4 rounded-lg text-cyan-400 text-sm overflow-x-auto">
-            docker-compose -f docker-compose.labs.yml up -d
-          </pre>
-          <p className="text-slate-400 text-sm mt-2">
-            Cada laboratorio incluye aplicaciones vulnerables y documentación paso a paso. Consulta la documentación en cada contenedor.
-          </p>
-        </div>
-
-        <h2 className="text-xl font-semibold mb-6 text-slate-300">Laboratorios disponibles</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          {labs.map((lab, i) => (
+      <div className="space-y-6">
+        {labs.map((lab, i) => {
+          const labUrl = typeof window !== 'undefined'
+            ? `${window.location.protocol}//${window.location.hostname}:${lab.port}/`
+            : `http://localhost:${lab.port}/`
+          return (
             <motion.div
               key={lab.id}
               id={lab.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i * 0.02, 0.3) }}
-              className="p-5 rounded-xl bg-[#1a2234]/80 border border-[#334155]/50 hover:border-emerald-500/30 transition-all"
+              transition={{ delay: i * 0.1 }}
+              className="rounded-2xl border border-white/5 bg-[var(--bg-card)]/80 backdrop-blur overflow-hidden scroll-mt-8 hover:border-[var(--accent)]/25 transition-all duration-300"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-xs text-emerald-400/80 font-mono">{lab.module}</span>
-                  <h3 className="font-semibold mt-1">{lab.name}</h3>
-                  <p className="text-sm text-slate-500 mt-1">{lab.desc}</p>
+              <div className="flex flex-col lg:flex-row">
+                <div className="flex-1 p-6">
+                  <div className="flex items-start justify-between gap-6">
+                    <div>
+                      <span className="text-sm font-semibold text-[var(--accent)]">{lab.module}</span>
+                      <h2 className="text-2xl font-bold text-white mt-1">{lab.name}</h2>
+                      <p className="text-[var(--text-muted)] mt-2 text-lg">{lab.desc}</p>
+                      <div className="flex items-center gap-2 mt-4">
+                        <span className="text-xs text-[var(--text-dim)] font-mono">Login:</span>
+                        <code className="text-sm bg-[var(--bg-base)] px-3 py-1.5 rounded-lg text-[var(--accent)] border border-white/5 font-mono">
+                          {lab.credentials}
+                        </code>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Link
+                        href={`/labs/${lab.id}`}
+                        className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-[var(--accent)]/15 hover:border-[var(--accent)]/30 transition-all"
+                      >
+                        <ListChecks className="h-5 w-5" />
+                        Modo lab guiado
+                      </Link>
+                      <a
+                        href={labUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[var(--accent)] text-[var(--bg-base)] font-bold hover:bg-[var(--accent-bright)] transition-all shadow-[0_0_30px_-8px_var(--accent)] hover:scale-105 active:scale-95"
+                      >
+                        <Play className="h-5 w-5" />
+                        Abrir lab
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {lab.vulns.map((v) => (
+                      <span key={v} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--danger)]/15 text-[var(--danger)] text-sm font-semibold border border-[var(--danger)]/20">
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        {v}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <FlaskConical className="w-5 h-5 text-emerald-400/50 flex-shrink-0" />
+
+                <div className="lg:w-80 border-t lg:border-t-0 lg:border-l border-white/5 p-6 bg-[var(--bg-elevated)]/50">
+                  <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-[var(--accent)]" />
+                    Pasos
+                  </h3>
+                  <ol className="space-y-3">
+                    {lab.steps.map((step, j) => (
+                      <li key={j} className="flex gap-3 text-sm text-[var(--text-muted)]">
+                        <span className="shrink-0 flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--accent)]/20 text-[var(--accent)] text-xs font-bold font-mono">
+                          {j + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               </div>
             </motion.div>
+          )
+        })}
+      </div>
+
+      <div className="mt-16">
+        <h2 className="text-xl font-bold text-white mb-4">Temario de laboratorios</h2>
+        <p className="text-[var(--text-muted)] mb-6">
+          Ejercicios prácticos con guías detalladas en cada lección del curso
+        </p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[
+            'SQL Injection', 'XSS', 'CSRF', 'RCE', 'SSRF', 'XXE',
+            'LFI', 'RFI', 'Deserialization', 'Broken Auth', 'Sesiones',
+            'JWT', 'OAuth', 'TLS', 'AES', 'RBAC', 'ABAC',
+            'CSP', 'HSTS', 'Misconfiguration', 'Logging', 'SAST', 'DAST', 'ZAP'
+          ].map((name, i) => (
+            <div
+              key={i}
+              className="p-4 rounded-xl bg-[var(--bg-card)]/60 backdrop-blur border border-white/5 text-[var(--text)] font-medium hover:border-[var(--accent)]/20 hover:bg-[var(--bg-card)]/80 transition-all duration-300"
+            >
+              {name}
+            </div>
           ))}
         </div>
-
-        <div className="mt-12 p-6 rounded-xl bg-amber-500/10 border border-amber-500/20">
-          <h3 className="font-semibold text-amber-400 mb-2">DVWA - Damn Vulnerable Web Application</h3>
-          <p className="text-slate-300 mb-4">
-            Incluimos DVWA como entorno de prácticas general. Cubre SQLi, XSS, CSRF, LFI, RCE y más.
-          </p>
-          <p className="text-slate-400 text-sm">
-            URL: <code className="text-cyan-400">http://localhost:4280</code> (login: admin / password)
-          </p>
-        </div>
-      </main>
+      </div>
     </div>
   )
 }

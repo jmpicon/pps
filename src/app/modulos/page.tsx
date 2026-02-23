@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Shield, Bug, Key, Lock, Settings, Search, ArrowLeft } from 'lucide-react'
+import { Shield, Bug, Key, Lock, Settings, Search, ArrowRight } from 'lucide-react'
 import { allModules } from '@/content/modules/registry'
 
 const icons: Record<string, React.ElementType> = {
@@ -16,54 +16,43 @@ const icons: Record<string, React.ElementType> = {
 
 export default function ModulosPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e17] via-[#0f172a] to-[#0a0e17]">
-      <header className="border-b border-[#334155]/50 bg-[#0a0e17]/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition">
-            <ArrowLeft className="w-5 h-5" />
-            Volver
-          </Link>
-          <Link href="/" className="flex items-center gap-2 text-xl font-semibold">
-            <Shield className="w-7 h-7 text-cyan-400" />
-            PPS Plataforma
-          </Link>
-        </div>
-      </header>
+    <div className="max-w-4xl mx-auto px-6 lg:px-12 py-12 lg:py-16">
+      <div className="mb-12">
+        <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">Plan de estudios</h1>
+        <p className="text-[var(--text-muted)] text-lg">
+          {allModules.length} módulos · {allModules.reduce((a, m) => a + m.lessons.length, 0)} lecciones
+        </p>
+      </div>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold mb-2">Módulos del curso</h1>
-        <p className="text-slate-400 mb-12">Selecciona un módulo para acceder al contenido teórico y práctico</p>
-
-        <div className="space-y-6">
-          {allModules.map((mod, i) => {
-            const Icon = icons[mod.icon] || Shield
-            return (
-              <motion.div
-                key={mod.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Link href={`/modulos/${mod.id}/`}>
-                  <div className="group p-6 rounded-2xl bg-[#1a2234]/80 border border-[#334155]/50 hover:border-cyan-500/30 transition-all flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-400">
-                        <Icon className="w-8 h-8" />
-                      </div>
-                      <div>
-                        <span className="text-sm text-cyan-400/80 font-mono">Módulo {mod.number}</span>
-                        <h2 className="text-xl font-semibold group-hover:text-cyan-400 transition">{mod.title}</h2>
-                        <p className="text-slate-500">{mod.description}</p>
-                      </div>
-                    </div>
-                    <span className="text-cyan-400 opacity-0 group-hover:opacity-100 transition">→</span>
+      <div className="space-y-4">
+        {allModules.map((mod, i) => {
+          const Icon = icons[mod.icon] || Shield
+          return (
+            <motion.div
+              key={mod.id}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.4 }}
+            >
+              <Link href={`/modulos/${mod.id}`}>
+                <div className="group flex items-center gap-6 p-6 rounded-2xl bg-[var(--bg-card)]/80 backdrop-blur border border-white/5 hover:border-[var(--accent)]/30 transition-all duration-300">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/15 text-[var(--accent)] group-hover:bg-[var(--accent)]/25 group-hover:scale-105 transition-all">
+                    <Icon className="h-7 w-7" />
                   </div>
-                </Link>
-              </motion.div>
-            )
-          })}
-        </div>
-      </main>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-[var(--accent)]">Módulo {mod.number}</span>
+                    <h2 className="text-xl font-bold text-white mt-1 group-hover:text-[var(--accent)] transition-colors">
+                      {mod.title}
+                    </h2>
+                    <p className="text-[var(--text-muted)] mt-1">{mod.description}</p>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-[var(--text-dim)] group-hover:text-[var(--accent)] group-hover:translate-x-2 transition-all shrink-0" />
+                </div>
+              </Link>
+            </motion.div>
+          )
+        })}
+      </div>
     </div>
   )
 }

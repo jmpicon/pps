@@ -1,18 +1,16 @@
-version: '3.8'
-
 services:
-  # Plataforma web principal
+  # Plataforma web principal - Todo el contenido del curso
   pps-platform:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
       - NODE_ENV=production
     restart: unless-stopped
 
-  # DVWA - Entorno de prácticas vulnerable
+  # DVWA - Entorno de prácticas (SQLi, XSS, CSRF, LFI, RCE...)
   dvwa:
     image: vulnerables/web-dvwa:latest
     ports:
@@ -23,7 +21,8 @@ services:
       - MYSQL_USER=dvwa
       - MYSQL_PASSWORD=p@ssw0rd
     depends_on:
-      - dvwa-db
+      dvwa-db:
+        condition: service_healthy
     restart: unless-stopped
 
   dvwa-db:
@@ -35,9 +34,14 @@ services:
       - MYSQL_PASSWORD=p@ssw0rd
     volumes:
       - dvwa_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysql", "-u", "root", "-proot", "-e", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
     restart: unless-stopped
 
-  # Laboratorio SQL Injection - Apache + PHP + MySQL
+  # Lab SQL Injection - Práctica guiada
   lab-sqli:
     build:
       context: ./labs/sqli
@@ -50,7 +54,8 @@ services:
       - MYSQL_PASSWORD=root
       - MYSQL_DATABASE=seguridad_db
     depends_on:
-      - lab-sqli-db
+      lab-sqli-db:
+        condition: service_healthy
     restart: unless-stopped
 
   lab-sqli-db:
@@ -61,6 +66,11 @@ services:
     volumes:
       - lab_sqli_data:/var/lib/mysql
       - ./labs/sqli/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysql", "-u", "root", "-proot", "-e", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
     restart: unless-stopped
 
 volumes:
